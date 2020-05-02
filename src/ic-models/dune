@@ -1,0 +1,5 @@
+(library
+  (name ic_models)
+  (libraries core ic_tester)
+  (preprocess (pps ppx_jane))
+)

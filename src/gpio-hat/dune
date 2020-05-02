@@ -1,0 +1,5 @@
+(library
+  (name gpio_hat)
+  (libraries core smbus time_now)
+  (preprocess (pps ppx_jane))
+)

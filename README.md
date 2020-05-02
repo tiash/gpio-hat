@@ -35,7 +35,7 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
    ```bash
    sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
    opam init
-   opam install dune core
+   opam install dune core ppx_jane time_now
    ```
 4. Get the code
    ```bash
@@ -55,11 +55,11 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
       **TODO** Image of the board with an IC inserted correctly, highlight the pin1 mark
 3. Run the IC tester tool
    ```bash
-   bin/ic-tester.exe test IC_NAME
+   bin/tester.exe test IC_NAME
    ```
    If you have a bunch of ICs of the same type you want to test you can also run
    ```bash
-   bin/ix-tester.exe batch-test IC_NAME
+   bin/tester.exe batch-test IC_NAME
    ```
    And press any key to run the test after swapping the ICs
 4. If the IC has defects (or you selected the wrong IC_NAME) the tool will report errors

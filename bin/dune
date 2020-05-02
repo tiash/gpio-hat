@@ -1,0 +1,13 @@
+(executable
+  (name flasher)
+  (modules flasher)
+  (libraries core eeprom_flasher)
+  (preprocess (pps ppx_jane))
+)
+
+(executable
+  (name tester)
+  (modules tester)
+  (libraries core ic_tester ic_models)
+  (preprocess (pps ppx_jane))
+)

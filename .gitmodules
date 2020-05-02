@@ -1,0 +1,3 @@
+[submodule "vendor/ocaml-smbus"]
+	path = vendor/ocaml-smbus
+	url = https://github.com/LaurentMazare/ocaml-smbus.git

@@ -1,0 +1,5 @@
+(library
+  (name ic_tester)
+  (libraries core gpio_hat)
+  (preprocess (pps ppx_jane))
+)
