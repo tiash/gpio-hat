@@ -12,7 +12,7 @@ And some ocaml programs for driving the whole thing.
 # Hardware
 Several people made some really neat [arduino](https://blog.arduino.cc/2018/02/05/automated-ic-testing-with-arduino-mega/) [powered](https://hackaday.com/2018/02/15/building-an-arduino-smart-ic-tester-for-25/) [IC](https://www.electronicsforu.com/electronics-projects/hardware-diy/arduino-based-digital-ic-tester-truth-table) [testers](https://blog.arduino.cc/2018/02/05/automated-ic-testing-with-arduino-mega/), but these all seem to be running into the limits of what the platform could do, so I thought why no use a PI, it has WAY more compute power!
 
-So the idea of a PI Hat ~~with screen~~ and ZIF socket for testing ICs was born.
+So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was born.
 
 The Raspberry PI has actually surprisingly few IO pins and they are all on 3.3V, I was looking for something that was a little more robust and could handle 5V TTL levels. With a bit of searching I discovered the [TCA6424A](https://www.ti.com/product/TCA6424A), 24pin Level shifting I2C GPIO expander, a perfect fit (mostly).
 The part is a little small though, but nothing that a cheap SMD assembly shop couldn't handle.
