@@ -17,3 +17,5 @@ let uint bits =
 let uint' bits value =
   Logic.all_unit
     (List.mapi (List.rev bits) ~f:(fun i bit -> bit (value land (1 lsr i) <> 0)))
+
+let not' bit value = bit (not value)

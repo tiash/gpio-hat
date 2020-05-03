@@ -13,6 +13,12 @@ module Common : sig
   val sync : unit t
 
   val choice : 'a t list -> 'a t
+
+  val sample : ?n:int -> 'a t -> 'a t
+
+  val require' : 'a t -> f:('a -> bool) -> 'a t
+
+  val require : 'a t -> f:('a -> bool) -> unit t
 end
 
 module Let_syntax : sig

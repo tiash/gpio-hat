@@ -36,6 +36,8 @@ module T : sig
     | Bind : 'a t * ('a -> 'b t) -> 'b t
     | Both : 'a t * 'b t -> ('a * 'b) t
     | Choice : 'a t list -> 'a t
+    | Sample : int * 'a t -> 'a t
+    | Require : 'a t * ('a -> bool) -> 'a t
     | Input : Gpio_hat.Pin.t * bool -> unit t
     | Output : Gpio_hat.Pin.t * bool -> unit t
     | Constant : Gpio_hat.Pin.t * bool -> unit t
@@ -65,6 +67,12 @@ module T : sig
   val sync : unit t
 
   val choice : 'a t list -> 'a t
+
+  val require' : 'a t -> f:('a -> bool) -> 'a t
+
+  val require : 'a t -> f:('a -> bool) -> unit t
+
+  val sample : ?n:int -> 'a t -> 'a t
 end = struct
   type 'a t =
     | Return : 'a -> 'a t
@@ -72,6 +80,8 @@ end = struct
     | Bind : 'a t * ('a -> 'b t) -> 'b t
     | Both : 'a t * 'b t -> ('a * 'b) t
     | Choice : 'a t list -> 'a t
+    | Sample : int * 'a t -> 'a t
+    | Require : 'a t * ('a -> bool) -> 'a t
     | Input : Gpio_hat.Pin.t * bool -> unit t
     | Output : Gpio_hat.Pin.t * bool -> unit t
     | Constant : Gpio_hat.Pin.t * bool -> unit t
@@ -107,6 +117,10 @@ end = struct
                    find_and_remove [] b)
                  ~finish:(function [] -> true | _ :: _ -> false)
              else false
+         | Sample (a, b), Sample (c, d) ->
+             if Int.equal a c then equal b d else false
+         | Require (a, b), Require (c, d) ->
+             if phys_same b d then equal a c else false
          | Input (a, b), Input (c, d) ->
              if Bool.equal b d then Gpio_hat.Pin.equal a c else false
          | Output (a, b), Output (c, d) ->
@@ -115,10 +129,12 @@ end = struct
              if Bool.equal b d then Gpio_hat.Pin.equal a c else false
          | Not_connected a, Not_connected b -> Gpio_hat.Pin.equal a b
          | Sync, Sync -> true
-         | ( ( Return _ | Map _ | Bind _ | Both _ | Choice _ | Input _
-             | Output _ | Constant _ | Not_connected _ | Sync ),
-             ( Return _ | Map _ | Bind _ | Both _ | Choice _ | Input _
-             | Output _ | Constant _ | Not_connected _ | Sync ) ) ->
+         | ( ( Return _ | Map _ | Bind _ | Both _ | Choice _ | Sample _
+             | Require _ | Input _ | Output _ | Constant _ | Not_connected _
+             | Sync ),
+             ( Return _ | Map _ | Bind _ | Both _ | Choice _ | Sample _
+             | Require _ | Input _ | Output _ | Constant _ | Not_connected _
+             | Sync ) ) ->
              false
        : bool )
 
@@ -141,30 +157,52 @@ end = struct
         in
         no_dups ts;
         List.iter ts ~f:validate_choice
+    | Sample (n, t) ->
+        if n <= 0 then
+          raise_s [%message "Must take at least one sample" (n : int)]
+        else validate t
+    | Require (t, _) -> validate_require t
 
   and validate_bound : type a. a t -> unit = function
     | Both _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync -> ()
+    | Sample _ as t -> validate t
     | Return _ -> failwith "Constant map/bind not allowed"
     | Bind _ | Map _ -> failwith "Nested map/bind not allowed"
     | Choice _ -> failwith "Choice in bind is not allowed"
+    | Require (t, _) -> validate_require t
 
   and validate_both : type a. a t -> unit = function
     | Input _ | Output _ | Constant _ | Not_connected _ | Sync -> ()
+    | Sample _ as t -> validate t
     | Return _ -> failwith "Constant pair not allowed"
     | Bind _ | Map _ -> failwith "Pair of map/bind not allowed"
     | Both (a, b) ->
         validate_both a;
         validate_both b
     | Choice _ -> failwith "Choice in pair is not allowed"
+    | Require (t, _) -> validate_require t
 
   and validate_choice : type a. a t -> unit = function
     | Return _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync -> ()
+    | Sample _ as t -> validate t
     | Map (t, _) -> validate_bound t
     | Bind (t, _) -> validate_bound t
     | Both (a, b) ->
         validate_both a;
         validate_both b
     | Choice _ -> failwith "Nested choice is not allowed"
+    | Require (t, _) -> validate_require t
+
+  and validate_require : type a. a t -> unit = function
+    | Return _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync -> ()
+    | Sample _ as t -> validate t
+    | Map (t, _) -> validate_bound t
+    | Bind (t, _) -> validate_bound t
+    | Both (a, b) ->
+        validate_both a;
+        validate_both b
+    | Require _ -> failwith "Nested require makes no sense"
+    | Choice _ -> failwith "Nested choice is not allowed in require"
 
   let input' p v = Input (p, v)
 
@@ -178,12 +216,19 @@ end = struct
 
   let return t = Return t
 
+  let rec sample ?(n = 1) t =
+    match t with
+    | Sample (n', t) -> sample ~n:(Int.max n n') t
+    | t -> Sample (n, t)
+
   let rec ignore_m : type a. a t -> unit t = function
     | Return _ -> return ()
     | Map (t, _) -> ignore_m t
     | Bind (t, f) -> bind t ~f:(fun t -> ignore_m (f t))
     | Both (a, b) -> map (both (ignore_m a) (ignore_m b)) ~f:Fn.ignore
     | Choice ts -> choice (List.map ts ~f:ignore_m)
+    | Sample (n, t) -> sample ~n (ignore_m t)
+    | Require _ as t -> map t ~f:Fn.ignore
     | (Input _ | Output _ | Constant _ | Not_connected _ | Sync) as t -> t
 
   and map : type a b. a t -> f:(a -> b) -> b t =
@@ -193,7 +238,9 @@ end = struct
        | Map (t, f') -> map t ~f:(fun t -> f (f' t))
        | Bind (t, f') -> bind t ~f:(fun t -> map (f' t) ~f)
        | Choice ts -> choice (List.map ts ~f:(map ~f))
-       | Both _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync ->
+       | Sample (n, t) -> sample ~n (map t ~f)
+       | Both _ | Require _ | Input _ | Output _ | Constant _ | Not_connected _
+       | Sync ->
            Map (t, f)
        : b t )
 
@@ -204,7 +251,8 @@ end = struct
        | Map (t, f') -> bind t ~f:(fun t -> f (f' t))
        | Bind (t, f') -> bind t ~f:(fun t -> bind (f' t) ~f)
        | Choice ts -> choice (List.map ts ~f:(bind ~f))
-       | Both _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync ->
+       | Both _ | Require _ | Input _ | Output _ | Constant _ | Sample _
+       | Not_connected _ | Sync ->
            Bind (t, f)
        : b t )
 
@@ -234,9 +282,10 @@ end = struct
                   both a b))
        | Choice ts_a, b -> choice (List.map ts_a ~f:(fun a -> both a b))
        | a, Choice ts_b -> choice (List.map ts_b ~f:(fun b -> both a b))
-       | ( (Both _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync),
-           (Both _ | Input _ | Output _ | Constant _ | Not_connected _ | Sync) )
-         ->
+       | ( ( Require _ | Both _ | Input _ | Output _ | Constant _
+           | Not_connected _ | Sync | Sample _ ),
+           ( Require _ | Both _ | Input _ | Output _ | Constant _
+           | Not_connected _ | Sync | Sample _ ) ) ->
            Both (a, b)
        : (a * b) t )
 
@@ -249,7 +298,7 @@ end = struct
              match hd with
              | Choice ts -> dedup (dedup acc ts) tl
              | Return _ | Map _ | Bind _ | Both _ | Input _ | Output _
-             | Constant _ | Not_connected _ | Sync ->
+             | Constant _ | Sample _ | Require _ | Not_connected _ | Sync ->
                  if List.exists acc ~f:(equal hd) then dedup acc tl
                  else dedup (hd :: acc) tl )
          : a t list )
@@ -259,6 +308,19 @@ end = struct
       | [] -> failwith "Empty choice is not allowed"
       | [ t ] -> t
       | ts -> Choice ts
+
+  and require_opt : type a. a t -> f:(a -> bool) -> a t option =
+    fun (type a) (t : a t) ~(f : a -> bool) ->
+     match t with
+     | Return v -> if f v then Some t else None
+     | Sample (n, t) -> Option.map (require_opt t ~f) ~f:(sample ~n)
+     | Require (t, f') -> require_opt t ~f:(fun v -> f' v && f v)
+     | Choice ts -> (
+         match List.filter_map ts ~f:(require_opt ~f) with
+         | [] -> None
+         | [ t ] -> Some t
+         | _ :: _ :: _ as ts -> Some (choice ts) )
+     | t -> Some (Require (t, f))
 
   let input t =
     choice
@@ -316,6 +378,20 @@ end = struct
     let t = choice ts in
     validate t;
     t
+
+  let sample ?n t =
+    let t = sample ?n t in
+    validate t;
+    t
+
+  let require' t ~f =
+    match require_opt t ~f with
+    | None -> failwith "Unsatisfiable requirements"
+    | Some t ->
+        validate t;
+        t
+
+  let require t ~f = ignore_m (require' t ~f)
 end
 
 include T
@@ -324,6 +400,12 @@ module Common = struct
   let sync = sync
 
   let choice = choice
+
+  let sample = sample
+
+  let require' = require'
+
+  let require = require
 end
 
 module Expert = struct
@@ -466,6 +548,15 @@ let rec eval' :
   | Choice ts ->
       Sequence.of_list (List.permute ts)
       |> Sequence.concat_map ~f:(eval' ~prev_pins ~pins)
+  | Sample (n, t) -> Sequence.take (eval' ~prev_pins ~pins t) n
+  | Require (t, f) ->
+      Sequence.concat_map (eval' ~prev_pins ~pins t) ~f:(function
+        | (_, First t) as res ->
+            if f t then Sequence.singleton res else Sequence.empty
+        | pins, Second t ->
+            if no_changes ~prev_pins ~pins then
+              eval' ~prev_pins:Gpio_hat.Pin.Map.empty ~pins (require' t ~f)
+            else eval_sync ~pins (require' t ~f))
   | Input (pin, value) ->
       eval_return_set_pin ~prev_pins ~pins ~pin (Input value)
   | Output (pin, value) ->

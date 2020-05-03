@@ -2,14 +2,6 @@
 
 
 
-let () =
-  dip16 ~name:"74283" ~description:"4-Bit Binary Adder with Fast Carry"
-    (fun z2 b2 a2 z1 a1 b1 c1 z5 z4 b4 a4 z3 a3 b3 ->
-      let%bind a = input4 a1 a2 a3 a4
-      and b = input4 b1 b2 b3 b4
-      and c = input1 c1 in
-      output5 z1 z2 z3 z4 z5 (a + b + c))
-
 let () = Random.self_init ()
 
 let rand ~max ~not_ =
@@ -67,79 +59,6 @@ let () =
           return state
       in
       choice [ clear; set >>= mset ] |> Ic_tester.Monad.ignore_m)
-
-let sync_counter_4bit ~name ?aliases ~description ~async_clear max =
-  assert (8 < max && max <= 16);
-  dip16 ~name ?aliases ~description
-    (fun not_clr clk d1 d2 d3 d4 enp not_load ent q4 q3 q2 q1 q5 ->
-      let _ = q5 in
-      let%bind () = input' clk false
-      and () = input' enp false
-      and () = input' ent false in
-      let check ~ent:ent_state state =
-        assert (0 <= state && state < max);
-        let%bind () = output4 q1 q2 q3 q4 state in
-        let%bind () = output q5 (state = max - 1 && ent_state) in
-        sync
-      in
-      let check' ~ent state =
-        let%bind () = input4' d1 d2 d3 d4 (rand ~max:16 ~not_:state) in
-        check ~ent state
-      in
-      let tick ~ent state =
-        let%bind () = sync in
-        let%bind () = input' clk true in
-        let%bind () = check' ~ent state in
-        let%bind () = input' clk false in
-        let%bind () = check' ~ent state in
-        return ()
-      in
-      let clear =
-        let%bind () = input' not_clr false and () = input' not_load true in
-        let%bind () =
-          if async_clear then check' ~ent:false 0 else tick ~ent:false 0
-        in
-        let%bind () = input' not_clr true in
-        let%bind () = check' ~ent:false 0 in
-        return 0
-      in
-      let load =
-        let%bind () = input' not_clr true and () = input' not_load false in
-        let%bind state = input4 d1 d2 d3 d4 in
-        let%bind () = input' not_load false in
-        let%bind () = tick ~ent:false state in
-        let%bind () = input' not_load true in
-        let%bind () = check' ~ent:false state in
-        return state
-      in
-      let count n =
-        let%bind () = sync in
-        let%bind ent = input ent and enp = input enp in
-        let n = if ent && enp then (n + 1) % max else n in
-        let%bind () = tick ~ent n in
-        return n
-      in
-      Ic_tester.Monad.ignore_m (choice [ clear; load ] >>= count >>= count))
-
-let () =
-  sync_counter_4bit ~name:"74160"
-    ~description:"Synchronous 4-bit decade Counter with asynchronous clear" 10
-    ~async_clear:true
-
-let () =
-  sync_counter_4bit ~name:"74161"
-    ~description:"Synchronous 4-bit Counter with asynchronous clear" 16
-    ~async_clear:true
-
-let () =
-  sync_counter_4bit ~name:"74162"
-    ~description:"Synchronous 4-bit decade Counter with synchronous clear" 10
-    ~async_clear:false
-
-let () =
-  sync_counter_4bit ~name:"74163"
-    ~description:"Synchronous 4-bit Counter with synchronous clear" 16
-    ~async_clear:false
 
 let () =
   dip16 ~name:"74595"

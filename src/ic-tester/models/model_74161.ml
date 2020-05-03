@@ -12,11 +12,11 @@ let model =
        all
          [ output "Q_4" 11; output "Q_3" 12; output "Q_2" 13; output "Q_1" 14 ]
        >>| Util.uint'
-     and clear = input' "~CLR" 1 >>| fun f v -> f (not v)
+     and clear = input' "~CLR" 1 >>| Util.not'
      and clock = input' "CLK" 2
      and enp = input "ENP" 7
      and ent = input "ENT" 10
-     and load = input' "~LOAD" 9 >>| fun f v -> f (not v)
+     and load = input' "~LOAD" 9 >>| Util.not'
      and carry = output "CARRY" 15 in
      let%bind () = Logic.all_unit [ load false; clear false; clock false ] in
      let%bind () = sync in
