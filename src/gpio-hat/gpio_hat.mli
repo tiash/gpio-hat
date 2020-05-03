@@ -1,4 +1,4 @@
-open !Core
+open! Core
 module Pin = Pin
 module Mode = Mode
 

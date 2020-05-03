@@ -1,4 +1,5 @@
 open Core
+open Ic_tester
 
 module Pin = struct
   type t =
@@ -9,7 +10,7 @@ module Pin = struct
     | Mismatch of bool
   [@@deriving sexp_of, compare]
 
-  let of_action : Ic_monad.Action.t -> t = function
+  let of_action : Logic.Action.t -> t = function
     | Input t -> Input t
     | Output t -> Output t
     | Constant t -> Constant t
@@ -67,7 +68,7 @@ let to_string_ansi =
   loop ~ix:1 ?prev:None ~acc:[]
 
 let rec traces' ~prev_pins t =
-  Sequence.concat_map (Ic_monad.eval ~prev_pins t) ~f:(function pins, res ->
+  Sequence.concat_map (Logic.eval ~prev_pins t) ~f:(function pins, res ->
       (let state = Map.map pins ~f:Pin.of_action in
        match res with
        | First () -> Sequence.of_list [ [ state ] ]

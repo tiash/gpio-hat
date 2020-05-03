@@ -1,0 +1,5 @@
+(library
+  (name ic_tester_command)
+  (libraries core gpio_hat ic_tester ic_tester_models)
+  (preprocess (pps ppx_jane))
+)

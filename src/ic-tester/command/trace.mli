@@ -1,4 +1,5 @@
 open Core
+open Ic_tester
 
 module Pin : sig
   type t =
@@ -22,4 +23,4 @@ type t = State.t list [@@deriving sexp_of, compare]
 
 val to_string_ansi : t -> string
 
-val traces : unit Ic_monad.t -> t Sequence.t
+val traces : unit Logic.t -> t Sequence.t

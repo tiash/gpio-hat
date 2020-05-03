@@ -9,7 +9,7 @@
 (executable
   (name tester)
   (modules tester)
-  (libraries core ic_tester ic_models)
+  (libraries core ic_tester_command)
   (preprocess (pps ppx_jane))
   (promote (until-clean))
 )

@@ -1,8 +1,12 @@
 let all =
   [
     (*$
-      open! Core;;
-      printf "\n    ";;
+      open! Core
+
+      ;;
+      printf "\n    "
+
+      ;;
       Sys.ls_dir "."
       |> List.filter_map ~f:(String.chop_suffix ~suffix:".ml")
       |> List.filter_map ~f:(String.chop_prefix ~prefix:"model_")

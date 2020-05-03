@@ -47,7 +47,7 @@ module Expert : sig
 
   val output : Gpio_hat.Pin.t -> bool -> unit t
 
-  val constant : Gpio_hat.Pin.t -> bool -> unit t	
+  val constant : Gpio_hat.Pin.t -> bool -> unit t
 
   val not_connected : Gpio_hat.Pin.t -> unit t
 end
@@ -56,4 +56,3 @@ val eval :
   ?prev_pins:Action.t Gpio_hat.Pin.Map.t ->
   'a t ->
   (Action.t Gpio_hat.Pin.Map.t * ('a, 'a t) Either.t) Sequence.t
-
