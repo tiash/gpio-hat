@@ -1,5 +1,4 @@
 open Core
-
 module Monad = Ic_monad
 module Model = Model
 
@@ -18,17 +17,15 @@ let show_command models =
     (let%map_open.Command chip = anon (maybe ("IC" %: ic_arg models)) in
      fun () ->
        let describe model =
-         let title = 
-           Model.name model ^ " - " ^ Model.summary model
-in
+         let title = Model.name model ^ " - " ^ Model.summary model in
          print_endline title;
          print_endline (String.map title ~f:(const '='));
-         (match Model.aliases model with
-| [] -> ()
-| (_::_) as aliases ->
-print_endline ("also: " ^ String.concat ~sep:", " aliases));
+         ( match Model.aliases model with
+         | [] -> ()
+         | _ :: _ as aliases ->
+             print_endline ("also: " ^ String.concat ~sep:", " aliases) );
          print_endline (Model.to_string_pinout model);
-         print_endline (Model.description model);
+         print_endline (Model.description model)
        in
        match chip with
        | Some chip -> describe chip
@@ -49,9 +46,9 @@ let test_command models =
     (let%map_open.Command ic = anon ("IC" %: ic_arg models) in
      fun () ->
        match Monad_runner.test_m (Model.logic ic) with
-       | Ok () -> eprintf "\n\027[32;40mOK\027[0m - %s - %s\n"
-(Model.name ic)
-(Model.summary ic)
+       | Ok () ->
+           eprintf "\n\027[32;40mOK\027[0m - %s - %s\n" (Model.name ic)
+             (Model.summary ic)
        | Error error ->
            eprintf !"\n\027[31;40mError %s\027[0m\n" error;
            exit 1)

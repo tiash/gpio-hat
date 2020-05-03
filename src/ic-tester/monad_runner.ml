@@ -32,8 +32,7 @@ let test_trace' trace =
         let trace = List.take trace step @ [ state' ] in
         Error
           (sprintf
-             !"Unexpected IC Behaviour at step %d of %d.\n\
-               %{Trace#ansi}"
+             !"Unexpected IC Behaviour at step %d of %d.\n%{Trace#ansi}"
              step len trace))
 
 let test_m m =

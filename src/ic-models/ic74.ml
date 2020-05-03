@@ -1,4 +1,4 @@
-open Core
+(*open Core
 open Ic_tester.Monad.Let_syntax
 
 open Ic_tester.Monad.Expert
@@ -800,3 +800,4 @@ let all = !all
 let of_string s = Map.find_exn !all_ics s
 
 let arg_type = Command.Arg_type.create of_string
+*)

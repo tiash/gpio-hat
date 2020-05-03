@@ -1,4 +1,4 @@
-open Core
+(*open Core
 
 type t [@@deriving sexp_of]
 
@@ -15,3 +15,5 @@ val all : t list
 val of_string : string -> t
 
 val arg_type : t Command.Arg_type.t
+
+*)

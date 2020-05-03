@@ -3,6 +3,7 @@
   (modules flasher)
   (libraries core eeprom_flasher)
   (preprocess (pps ppx_jane))
+  (promote (until-clean))
 )
 
 (executable
@@ -10,4 +11,5 @@
   (modules tester)
   (libraries core ic_tester ic_models)
   (preprocess (pps ppx_jane))
+  (promote (until-clean))
 )

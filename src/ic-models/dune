@@ -3,3 +3,5 @@
   (libraries core ic_tester)
   (preprocess (pps ppx_jane))
 )
+
+(cinaps (files ic_models.ml) (libraries core))

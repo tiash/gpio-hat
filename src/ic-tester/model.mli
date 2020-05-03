@@ -1,8 +1,12 @@
 open! Core
 
-module Let_syntax : sig
-  type 'a t
+module Builder : sig
+type 'a t 
+end
 
+module Let_syntax : sig
+module Let_syntax : sig
+open Builder
   val map : 'a t -> f:('a -> 'b) -> 'b t
 val both : 'a t -> 'b t -> ('a * 'b) t
 
@@ -18,10 +22,11 @@ module Open_on_rhs : sig
   val input_output' : string -> Gpio_hat.Pin.t -> ((bool -> unit Ic_monad.t) * (bool -> unit Ic_monad.t)) t
 end 
 end
+end
 
 type t
 
-val create : name:string -> ?aliases:string list -> summary:string -> description:string -> (unit Ic_monad.t Let_syntax.t) -> t
+val create : string -> ?aliases:string list -> summary:string -> description:string -> (unit Ic_monad.t Builder.t) -> t
 
 val name : t -> string
 val summary : t -> string
