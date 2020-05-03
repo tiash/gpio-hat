@@ -14,7 +14,7 @@ let all =
   [ 
 EOF
 
-for file in $(grep -le "^let model =" model_*.ml); do
+for file in $(grep -le "^let model =" model_*.ml | sort -n); do
   echo "    [ $(module_name "${file%.ml}").model ] ;"
 done
 
