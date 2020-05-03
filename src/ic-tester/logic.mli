@@ -37,6 +37,8 @@ end
 
 include Monad.S with type 'a t := 'a t and module Let_syntax := Let_syntax
 
+val unsigned_int : bool t list -> int t
+
 include module type of Common
 
 (* Direct manipulation of pins, should use the let syntax in Model. *)

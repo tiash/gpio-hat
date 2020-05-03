@@ -51,18 +51,18 @@ let to_string_pinout t =
     List.fold t.pins ~init:1 ~f:(fun len pin ->
         Int.max len (String.length (Pin_spec.name pin)))
   in
-  [ sprintf "%*s     ___ ___     %-*s" label_width "" label_width "" ]
+  [ sprintf "%*s     _______     %-*s" label_width "" label_width "" 
+  ; sprintf "%*s    |  \\_/  |    %-*s" label_width "" label_width "" ]
   @ List.mapi pins ~f:(fun i (a, b) ->
-        sprintf "%*s %s|%-3d%c%3d|%s %-*s" label_width
+        sprintf "%*s %s|%-3d %3d|%s %-*s" label_width
           (Option.value_map a ~f:Pin_spec.name ~default:"")
           (Option.value_map a ~f:left_pin_mark ~default:"   ")
           (i + 1)
-          (if i = 0 then 'U' else ' ')
           ((2 * List.length pins) - i)
           (Option.value_map b ~f:right_pin_mark ~default:"   ")
           label_width
           (Option.value_map b ~f:Pin_spec.name ~default:""))
-  @ [ sprintf "%*s     -------     %-*s" label_width "" label_width "" ]
+  @ [ sprintf "%*s    |_______|    %-*s" label_width "" label_width "" ]
   |> List.map ~f:String.rstrip
 |> String.concat ~sep:"\n"
 

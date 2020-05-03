@@ -2,43 +2,18 @@ open! Core
 
 type 'a t
 
-module Let_syntax : sig
-  module Let_syntax : sig
-    val map : 'a t -> f:('a -> 'b) -> 'b t
+module type S = Pins_intf.S with type 'a t:='a t
 
-    val both : 'a t -> 'b t -> ('a * 'b) t
+module Make(Pin : sig
+type t
+val to_string : t-> string
+val pin : t -> Gpio_hat.Pin.t
+val fixed_pins : (t * string * [`High|`Low|`Not_connected]) list
+end) : S with type pin:=Pin.t
 
-    val return : 'a -> 'a t
+include S with type pin := Gpio_hat.Pin.t
 
-    module Open_on_rhs : sig
-      val vcc : [ `L of int | `R of int ] -> unit t
-
-      val gnd : [ `L of int | `R of int ] -> unit t
-
-      val not_connected : [ `L of int | `R of int ] -> unit t
-
-      val constant : string -> [ `L of int | `R of int ] -> bool -> unit t
-
-      val input : string -> [ `L of int | `R of int ] -> bool Logic.t t
-
-      val input' :
-        string -> [ `L of int | `R of int ] -> (bool -> unit Logic.t) t
-
-      val output :
-        string -> [ `L of int | `R of int ] -> (bool -> unit Logic.t) t
-
-      val input_output :
-        string ->
-        [ `L of int | `R of int ] ->
-        (bool Logic.t * (bool -> unit Logic.t)) t
-
-      val input_output' :
-        string ->
-        [ `L of int | `R of int ] ->
-        ((bool -> unit Logic.t) * (bool -> unit Logic.t)) t
-    end
-  end
-end
+val combine : unit Logic.t t list -> unit Logic.t t
 
 module Expert : sig
   module Kind : sig
@@ -60,3 +35,4 @@ module Expert : sig
 
   val value : 'a t -> 'a
 end
+

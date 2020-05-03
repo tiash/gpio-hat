@@ -14,11 +14,8 @@ let all =
   [ 
 EOF
 
-for single_model in $(grep -le "^let model =" *.ml); do
-  echo "    [ $(module_name "${single_model%.ml}").model ] ;"
-done
-for many_models in $(grep -le "^let models =" *.ml); do
-  echo "    $(module_name "${many_models%.ml}").models ;"
+for file in $(grep -le "^let model =" model_*.ml); do
+  echo "    [ $(module_name "${file%.ml}").model ] ;"
 done
 
 cat <<EOF

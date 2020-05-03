@@ -7,12 +7,12 @@ let gate n a b y =
   and b = input (sprintf "B_%s" n) b
   and y = output (sprintf "Y_%s" n) y in
   let%bind a = a and b = b in
-  y (not (a && b))
+  y (not (Bool.equal a b))
 
 let model =
   Model.create
-    "7400" ~aliases:[ "74LS00"; "7403"; "74132" ]
-    ~summary:"Quad 2-Input NAND Gate" ~description:"" 
+    "7486" ~aliases:[ "74LS86"]
+    ~summary:"Quad 2-Input XOR Gate" ~description:"" 
     (Pins.combine
       [ gate "1" 1 2 3
       ; gate "2" 4 5 6

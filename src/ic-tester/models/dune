@@ -6,6 +6,6 @@
 
 (rule
   (action (with-stdout-to ic_tester_models.ml (run ./ic_tester_models.ml.sh)))
-  (deps (sandbox none)))
+  (deps (glob_files model_*.ml)))
   
 

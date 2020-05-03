@@ -11,11 +11,11 @@ let gate n a b y =
 
 let model =
   Model.create
-    "7400" ~aliases:[ "74LS00"; "7403"; "74132" ]
-    ~summary:"Quad 2-Input NAND Gate" ~description:"" 
+    "7402" ~aliases:[ "74LS02" ]
+    ~summary:"Quad 2-Input NOR Gate" ~description:"" 
     (Pins.combine
-      [ gate "1" 1 2 3
-      ; gate "2" 4 5 6
-      ; gate "3" 9 10 8
-      ; gate "4" 12 13 11
+      [ gate "1" 2 3 1
+      ; gate "2" 5 6 4
+      ; gate "3" 8 9 10
+      ; gate "4" 11 12 13
       ])
