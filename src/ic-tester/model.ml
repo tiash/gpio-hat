@@ -1,7 +1,5 @@
 open Core
-
 module Pin_spec = Pins.Expert.Spec
-
 
 let pin_mark pin =
   match Pin_spec.kind pin with
@@ -27,7 +25,14 @@ type t = {
 [@@deriving sexp_of, fields]
 
 let create name ?(aliases = []) ~summary ~description spec =
-  { name; summary; aliases; description; pins = Pins.Expert.pins spec; logic = Pins.Expert.value spec }
+  {
+    name;
+    summary;
+    aliases;
+    description;
+    pins = Pins.Expert.pins spec;
+    logic = Pins.Expert.value spec;
+  }
 
 let to_string t = sprintf "%s - %s" t.name t.summary
 
@@ -51,8 +56,10 @@ let to_string_pinout t =
     List.fold t.pins ~init:1 ~f:(fun len pin ->
         Int.max len (String.length (Pin_spec.name pin)))
   in
-  [ sprintf "%*s     _______     %-*s" label_width "" label_width "" 
-  ; sprintf "%*s    |  \\_/  |    %-*s" label_width "" label_width "" ]
+  [
+    sprintf "%*s     _______     %-*s" label_width "" label_width "";
+    sprintf "%*s    |  \\_/  |    %-*s" label_width "" label_width "";
+  ]
   @ List.mapi pins ~f:(fun i (a, b) ->
         sprintf "%*s %s|%-3d %3d|%s %-*s" label_width
           (Option.value_map a ~f:Pin_spec.name ~default:"")
@@ -63,7 +70,6 @@ let to_string_pinout t =
           label_width
           (Option.value_map b ~f:Pin_spec.name ~default:""))
   @ [ sprintf "%*s    |_______|    %-*s" label_width "" label_width "" ]
-  |> List.map ~f:String.rstrip
-|> String.concat ~sep:"\n"
+  |> List.map ~f:String.rstrip |> String.concat ~sep:"\n"
 
 let truth_table _t _pins = raise_s [%message "TODO"]

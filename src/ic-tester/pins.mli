@@ -2,14 +2,17 @@ open! Core
 
 type 'a t
 
-module type S = Pins_intf.S with type 'a t:='a t
+module type S = Pins_intf.S with type 'a t := 'a t
 
-module Make(Pin : sig
-type t
-val to_string : t-> string
-val pin : t -> Gpio_hat.Pin.t
-val fixed_pins : (t * string * [`High|`Low|`Not_connected]) list
-end) : S with type pin:=Pin.t
+module Make (Pin : sig
+  type t
+
+  val to_string : t -> string
+
+  val pin : t -> Gpio_hat.Pin.t
+
+  val fixed_pins : (t * string * [ `High | `Low | `Not_connected ]) list
+end) : S with type pin := Pin.t
 
 include S with type pin := Gpio_hat.Pin.t
 
@@ -35,4 +38,3 @@ module Expert : sig
 
   val value : 'a t -> 'a
 end
-

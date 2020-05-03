@@ -30,9 +30,9 @@ let show_command =
        | Some chip -> describe chip
        | None -> List.iter Ic_tester_models.all ~f:describe)
 
-let trace_command  =
+let trace_command =
   Command.basic ~summary:"Print expected chip behaviour"
-    (let%map_open.Command ic = anon ("IC" %: ic_arg ) in
+    (let%map_open.Command ic = anon ("IC" %: ic_arg) in
      fun () ->
        Trace.traces (Model.logic ic)
        |> Sequence.iteri ~f:(fun i trace ->
@@ -42,7 +42,7 @@ let trace_command  =
 
 let test_command =
   Command.basic ~summary:"Test expected chip behaviour"
-    (let%map_open.Command ic = anon ("IC" %: ic_arg ) in
+    (let%map_open.Command ic = anon ("IC" %: ic_arg) in
      fun () ->
        match Monad_runner.test_m (Model.logic ic) with
        | Ok () ->
@@ -54,7 +54,7 @@ let test_command =
 
 let batch_test_command =
   Command.basic ~summary:"Test expected chip behaviour repeatedly"
-    (let%map_open.Command ic = anon ("IC" %: ic_arg ) in
+    (let%map_open.Command ic = anon ("IC" %: ic_arg) in
      fun () ->
        let step () =
          match Monad_runner.test_m (Model.logic ic) with
@@ -75,8 +75,8 @@ let batch_test_command =
 let command =
   Command.group ~summary:""
     [
-      ("show", show_command );
-      ("trace", trace_command );
-      ("test", test_command );
-      ("batch-test", batch_test_command );
+      ("show", show_command);
+      ("trace", trace_command);
+      ("test", test_command);
+      ("batch-test", batch_test_command);
     ]
