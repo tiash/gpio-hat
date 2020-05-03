@@ -3,11 +3,10 @@ open Ic_tester
 open Seventy_four_series
 
 let model =
-  Model.create "7400"
-    ~aliases:[ "74LS00"; "7403"; "74132" ]
-    ~summary:"Quad 2-Input NAND Gate" ~description:""
+  Model.create "74138" ~aliases:[ "74LS138" ]
+    ~summary:"3-line to 8-line decoder" ~description:""
     (let%map_open.Dip16 n =
-       all [ input "C" 3; input "B" 2; input "A" 1 ] >>| Logic.unsigned_int
+       all [ input "C" 3; input "B" 2; input "A" 1 ] >>| Util.uint
      and enabled =
        all [ input "G_1" 6; input "~G_2A" 4 >>|* not; input "~G_2B" 5 >>|* not ]
        >>| Logic.all >>|* List.for_all ~f:Fn.id

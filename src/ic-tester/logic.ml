@@ -380,12 +380,6 @@ module Let_syntax = struct
   end
 end
 
-let unsigned_int bits =
-  map (all bits) ~f:(fun bits ->
-      List.rev bits
-      |> List.foldi ~init:0 ~f:(fun i sum bit ->
-             if bit then sum + (1 lsr i) else sum))
-
 let no_changes ~prev_pins ~pins =
   Map.for_alli pins ~f:(fun ~key ~data ->
       match Map.find prev_pins key with
