@@ -3,8 +3,7 @@ open Ic_tester
 open Seventy_four_series
 
 let model =
-  Model.create "74189" ~aliases:[ "74LS189" ]
-    ~summary:"64-bit random access memory" ~description:""
+  Model.create "74189" ~summary:"64-bit random access memory" ~description:""
     (let%map_open.Dip16 addr =
        all [ input "A_3" 13; input "A_2" 14; input "A_1" 15; input "A_0" 1 ]
        >>| Util.uint

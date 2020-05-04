@@ -3,8 +3,8 @@ open Ic_tester
 open Seventy_four_series
 
 let model =
-  Model.create "74173" ~aliases:[ "74LS173" ]
-    ~summary:"4-Bit D-Type Register with 3-State Outputs" ~description:""
+  Model.create "74173" ~summary:"4-Bit D-Type Register with 3-State Outputs"
+    ~description:""
     (let%map_open.Dip16 output_enabled =
        all [ input "M" 1; input "N" 2 ] >>| Logic.all >>|* List.for_all ~f:Fn.id
      and q =

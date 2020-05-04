@@ -3,8 +3,8 @@ open Ic_tester
 open Seventy_four_series
 
 let model =
-  Model.create "74169" ~aliases:[ "74LS169" ]
-    ~summary:"Synchronous 4-bit Up/Down Binary Counter" ~description:""
+  Model.create "74169" ~summary:"Synchronous 4-bit Up/Down Binary Counter"
+    ~description:""
     (let%map_open.Dip16 n =
        all [ input "N_4" 6; input "N_3" 5; input "N_2" 4; input "N_1" 3 ]
        >>| Util.uint

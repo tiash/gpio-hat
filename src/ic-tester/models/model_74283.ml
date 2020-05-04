@@ -3,8 +3,8 @@ open Ic_tester
 open Seventy_four_series
 
 let model =
-  Model.create "74283" ~aliases:[ "74LS283" ]
-    ~summary:"4-Bit Binary Full Adder with Fast Carry" ~description:""
+  Model.create "74283" ~summary:"4-Bit Binary Full Adder with Fast Carry"
+    ~description:""
     (let%map_open.Dip16 a =
        all [ input "A_4" 12; input "A_3" 14; input "A_2" 3; input "A_1" 5 ]
        >>| Util.uint

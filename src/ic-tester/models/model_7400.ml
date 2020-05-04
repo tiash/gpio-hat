@@ -10,9 +10,7 @@ let gate n ~a ~b ~y =
   y (not (a && b))
 
 let model =
-  Model.create "7400"
-    ~aliases:[ "74LS00"; "7403"; "74132" ]
-    ~summary:"Quad 2-Input NAND Gate" ~description:""
+  Model.create "7400" ~summary:"Quad 2-Input NAND Gate" ~description:""
     (Pins.combine
        [
          gate "1" ~a:1 ~b:2 ~y:3;

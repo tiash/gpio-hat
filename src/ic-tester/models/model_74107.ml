@@ -39,8 +39,7 @@ let gate n ~j ~k ~q ~not_q ~clk ~not_clr =
   Logic.ignore_m (clear >>= tick >>= tick)
 
 let model =
-  Model.create "74107" ~aliases:[ "74LS107" ] ~summary:"Dual J-K Flip Flop"
-    ~description:""
+  Model.create "74107" ~summary:"Dual J-K Flip Flop" ~description:""
     (Pins.combine
        [
          gate "1" ~j:1 ~k:4 ~q:3 ~not_q:2 ~not_clr:13 ~clk:12;

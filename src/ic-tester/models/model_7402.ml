@@ -10,8 +10,7 @@ let gate n ~a ~b ~y =
   y (not (a && b))
 
 let model =
-  Model.create "7402" ~aliases:[ "74LS02" ] ~summary:"Quad 2-Input NOR Gate"
-    ~description:""
+  Model.create "7402" ~summary:"Quad 2-Input NOR Gate" ~description:""
     (Pins.combine
        [
          gate "1" ~a:2 ~b:3 ~y:1;

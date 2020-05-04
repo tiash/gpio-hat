@@ -5,11 +5,14 @@ let ic_arg =
   Command.Arg_type.create
     ~complete:(fun _ ~part ->
       List.concat_map Ic_tester_models.all ~f:(fun model ->
-          List.filter (Model.name model :: Model.aliases model)
+          List.filter
+            (Model.name model :: Model.aliases model)
             ~f:(String.Caseless.is_prefix ~prefix:part)))
     (fun name ->
       List.find_exn Ic_tester_models.all ~f:(fun model ->
-          List.exists (Model.name model :: Model.aliases model) ~f:(String.Caseless.equal name)))
+          List.exists
+            (Model.name model :: Model.aliases model)
+            ~f:(String.Caseless.equal name)))
 
 let show_command =
   Command.basic ~summary:"List known chips"
@@ -45,8 +48,7 @@ let test_command =
     (let%map_open.Command ic = anon ("IC" %: ic_arg) in
      fun () ->
        match Monad_runner.test_m (Model.logic ic) with
-       | Ok () ->
-           eprintf !"\n\027[32;40mOK\027[0m - %{Model}\n" ic;
+       | Ok () -> eprintf !"\n\027[32;40mOK\027[0m - %{Model}\n" ic
        | Error error ->
            eprintf !"\n\027[31;40mError %s\027[0m\n" error;
            exit 1)
@@ -57,7 +59,7 @@ let batch_test_command =
      fun () ->
        let step () =
          match Monad_runner.test_m (Model.logic ic) with
-         | Ok () -> eprintf !"\n\027[97;42mOK - %{Model} - %s\027[0m\n%!" ic
+         | Ok () -> eprintf !"\n\027[97;42mOK - %{Model}\027[0m\n%!" ic
          | Error error -> eprintf !"\n\027[97;41mError %s\027[0m\n%!" error
        in
        let rec loop () =

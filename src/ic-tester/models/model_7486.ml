@@ -10,8 +10,7 @@ let gate n ~a ~b ~y =
   y (not (Bool.equal a b))
 
 let model =
-  Model.create "7486" ~aliases:[ "74LS86" ] ~summary:"Quad 2-Input XOR Gate"
-    ~description:""
+  Model.create "7486" ~summary:"Quad 2-Input XOR Gate" ~description:""
     (Pins.combine
        [
          gate "1" ~a:1 ~b:2 ~y:3;
