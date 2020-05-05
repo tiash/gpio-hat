@@ -19,7 +19,7 @@ let gate n ~g ~n:(a, b) ~y:(y0, y1, y2, y3) =
   List.mapi y ~f:(fun i y -> y (not (enabled && n = i))) |> Logic.all_unit
 
 let model =
-  Model.create "74139" ~summary:"Quad 2-Input NAND Gate" ~description:""
+  Model.create "74139" ~summary:"Dual 2-line to 4-line decoder" ~description:""
     (Pins.combine
        [
          gate "1" ~g:1 ~n:(2, 3) ~y:(4, 5, 6, 7);

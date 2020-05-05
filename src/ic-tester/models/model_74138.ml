@@ -5,9 +5,9 @@ open Seventy_four_series
 let model =
   Model.create "74138" ~summary:"3-line to 8-line decoder" ~description:""
     (let%map_open.Dip16 n =
-       all [ input "C" 3; input "B" 2; input "A" 1 ] >>| Util.uint
+       all [ input "A_2" 3; input "A_1" 2; input "A_0" 1 ] >>| Util.uint
      and enabled =
-       all [ input "G_1" 6; input "~G_2A" 4 >>|* not; input "~G_2B" 5 >>|* not ]
+       all [ input "~E_1" 4 >>|* not; input "~E_2" 5 >>|* not; input "E_3" 6 ]
        >>| Logic.all >>|* List.for_all ~f:Fn.id
      and y =
        all
@@ -23,4 +23,4 @@ let model =
          ]
      in
      let%bind n = n and enabled = enabled in
-     Logic.all_unit (List.mapi y ~f:(fun i y -> y (not (enabled && n = i)))))
+     Logic.all_unit (List.mapi y ~f:(fun i y -> y (not enabled || n <> i))))

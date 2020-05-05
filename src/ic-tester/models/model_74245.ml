@@ -17,7 +17,8 @@ let model =
      and enabled = input "~E" 19 >>|* not in
      let%bind dir = dir and enabled = enabled in
      List.map2_exn a b ~f:(fun a b ->
-         if not enabled then Logic.all_unit [ snd a false; snd b false ]
+         if not enabled then (* unable to test for N/C / High Impeedence. *)
+           return ()
          else if dir then
            let%bind v = fst a in
            snd b v

@@ -14,9 +14,9 @@ Pins.Make (struct
   let to_string = Int.to_string
 
   let pin t =
-    if 1 <= t && t <= n / 2 then Gpio_hat.Pin.of_string (sprintf "A%d" t)
+    if 1 <= t && t <= n / 2 then Gpio_hat.Pin.of_string (sprintf "B%d" t)
     else if (n / 2) + 1 <= t && t <= n then
-      Gpio_hat.Pin.of_string (sprintf "B%d" (n - t + 1))
+      Gpio_hat.Pin.of_string (sprintf "A%d" (n - t + 1))
     else raise_s [%message "Pin out of range" (t : int) ~min:1 ~max:(n : int)]
 
   let fixed_pins = [ (n, "VCC", `High); (n / 2, "GND", `Low) ]

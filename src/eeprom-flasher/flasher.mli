@@ -1,7 +1,8 @@
 open! Core
 
 module Make (T : sig
-val name : string
+  val name : string
+
   val config_pins :
     cs:bool -> oe:bool -> we:bool -> (Gpio_hat.Pin.t * bool) list
 

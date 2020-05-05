@@ -19,32 +19,41 @@ let model =
      and carry = output "CARRY" 15 in
      let%bind () = Logic.all_unit [ load false; clear false; clock false ] in
      let%bind () = sync in
-     let check n =
-       let%map () = q n and () = carry (n = 0xf) in
+     let check ~ent n =
+       let%map () = q n and () = carry (ent && (n = 0xf)) in
        n
      in
      let clear =
        let%bind () = sync in
+       let%bind ent = ent and (_:bool) = enp and (_:int) = n in
        let%bind () = clear true in
        let%bind () = sync in
-       let%bind () = clear true in
-       check 0
+       let%bind state = check ~ent 0 in
+       let%bind () = clear false in
+       let%bind () = sync in
+       check ~ent state
      in
      let load =
-       let%bind n = n and () = load true in
+       let%bind () = sync in
+       let%bind ent = ent and (_:bool) = enp and n = n and () = load true in
        let%bind () = sync in
        let%bind () = clock true in
        let%bind () = sync in
+       let%bind n = check ~ent n in
        let%bind () = clock false and () = load false in
-       check n
+       check ~ent n
      in
      let step ~n =
-       let%bind enp = enp and ent = ent in
+       let%bind () = sync in
+       let%bind enp = sample enp and ent = sample ent in
        let%bind () = sync in
        let%bind () = clock true in
        let%bind () = sync in
        let%bind () = clock false in
-       check (if enp && ent then n + 1 else n)
+       let%bind () = sync in
+       let%bind n = check ~ent (if enp && ent then n + 1 else n) in
+       let%bind () = sync in
+       check ~ent n
      in
      let rec count ~n ~steps =
        if steps <= 0 then return ()

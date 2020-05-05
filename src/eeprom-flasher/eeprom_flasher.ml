@@ -1,7 +1,8 @@
 open! Core
 
 module Eeprom_16C28 = Flasher.Make (struct
-let name = "16C28"
+  let name = "16C28"
+
   let addr =
     [
       Gpio_hat.Pin.of_string "A6";
@@ -52,7 +53,7 @@ let name = "16C28"
   let write_finished ~expected ~actual = expected land 0x80 = actual land 0x80
 end)
 
-let command = Command.group ~summary:"" ["16C28", Eeprom_16C28.command]
+let command = Command.group ~summary:"" [ ("16C28", Eeprom_16C28.command) ]
 
 (*
 let init () =

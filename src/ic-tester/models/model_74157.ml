@@ -5,10 +5,10 @@ open Seventy_four_series
 let gate n ~a ~b ~z =
   let%map_open.Dip16 a = input (sprintf "A_%s" n) a
   and b = input (sprintf "B_%s" n) b
-  and z = output (sprintf "B_%s" n) z in
+  and z = output (sprintf "Z_%s" n) z in
   fun ~enabled ~s ->
     let%bind a = a and b = b in
-    z (enabled && if s then a else b)
+    z (enabled && if s then b else a)
 
 let model =
   Model.create "74157" ~summary:"Quad 2-Input Multiplexer" ~description:""

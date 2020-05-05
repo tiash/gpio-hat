@@ -31,7 +31,16 @@ let create name ?(aliases = []) ~summary ~description spec =
     aliases;
     description;
     pins = Pins.Expert.pins spec;
-    logic = Pins.Expert.value spec;
+    logic =
+      (let%bind.Logic () =
+         List.map (Pins.Expert.pins spec) ~f:(fun pin ->
+             match Pin_spec.kind pin with
+             | Constant value -> Logic.Expert.constant (Pin_spec.pin pin) value
+             | Input | Output | Input_output | Not_connected -> Logic.return ())
+         |> Logic.all_unit
+       in
+       let%bind.Logic () = Logic.sync in
+       Pins.Expert.value spec);
   }
 
 let to_string t = sprintf "%s - %s" t.name t.summary
@@ -45,12 +54,12 @@ let to_string_pinout t =
     List.init height ~f:(fun n ->
         ( List.find t.pins ~f:(fun pin ->
               match Pin_spec.pin pin with
-              | A n' -> Int.equal n' (n + 1)
-              | B _ -> false),
+              | B n' -> Int.equal n' (n + 1)
+              | A _ -> false),
           List.find t.pins ~f:(fun pin ->
               match Pin_spec.pin pin with
-              | B n' -> Int.equal n' (n + 1)
-              | A _ -> false) ))
+              | A n' -> Int.equal n' (n + 1)
+              | B _ -> false) ))
   in
   let label_width =
     List.fold t.pins ~init:1 ~f:(fun len pin ->

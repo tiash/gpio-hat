@@ -7,7 +7,7 @@ let gate n ~a ~b ~y =
   and b = input (sprintf "B_%s" n) b
   and y = output (sprintf "Y_%s" n) y in
   let%bind a = a and b = b in
-  y (not (a && b))
+  y (not (a || b))
 
 let model =
   Model.create "7402" ~summary:"Quad 2-Input NOR Gate" ~description:""

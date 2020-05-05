@@ -81,7 +81,8 @@ end = struct
 end
 
 module Make (T : sig
-val name : string
+  val name : string
+
   val config_pins :
     cs:bool -> oe:bool -> we:bool -> (Gpio_hat.Pin.t * bool) list
 
@@ -206,9 +207,7 @@ end = struct
       wait_loop () )
 
   let read ?(pos = Addr.of_int 0) ?length () =
-    let length =
-      Option.value length ~default:(capacity - Addr.to_int pos)
-    in
+    let length = Option.value length ~default:(capacity - Addr.to_int pos) in
     assert (Addr.to_int pos + length < capacity);
     List.init length ~f:(fun ix ->
         read_word (Addr.of_int (Addr.to_int pos + ix)))
@@ -349,7 +348,8 @@ end = struct
                errors := true;
                eprint_s
                  [%message
-                   "Unexpected data"(range:Range.t)
+                   "Unexpected data"
+                     (range : Range.t)
                      (ix : int)
                      (addr : Addr.t)
                      (expected_data : Data.t)
@@ -362,6 +362,12 @@ end = struct
        let data = data range in
        fun () -> write ~pos:(Range.pos range) data)
 
-let command = Command.group ~summary:("Helpers for reading/flashing " ^ T.name ^ " EEPROMs") [ "read",read_command; "check", check_command; "write", write_command]
+  let command =
+    Command.group
+      ~summary:("Helpers for reading/flashing " ^ T.name ^ " EEPROMs")
+      [
+        ("read", read_command);
+        ("check", check_command);
+        ("write", write_command);
+      ]
 end
-

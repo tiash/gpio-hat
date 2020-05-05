@@ -19,19 +19,17 @@ let model =
            output "~O_0" 5 >>| Util.not';
          ]
        >>| Util.uint'
-     and cs = input "~CS" 2 >>|* not
+(* CR-someday mhorn: The hardware can't test for non-driven pins *)
+     and () = constant "~CS" 2 false 
      and we = input "~WE" 3 >>|* not in
      let rec walk ~to_write ~to_read ~state =
        if Map.is_empty to_write && Set.is_empty to_read then return ()
        else
          let%bind () = sync in
-         let%bind addr = sample addr
-         and data = sample data
-         and cs = sample cs in
-         if not cs then
-           let%bind (_ : bool) = sample we and () = output 0 in
-           walk ~to_write ~to_read ~state
-         else
+         let%bind addr = sample (require' addr ~f:(fun a -> Map.mem to_write a || Set.mem to_read a)) in
+         let%bind data = sample (require' data ~f:(match Map.find to_write addr with
+| None -> const true | Some set -> Set.mem set)) in
+	 let%bind () = sync in
            let%bind to_read =
              match Map.find state addr with
              | None -> return to_read
@@ -40,6 +38,7 @@ let model =
                  Set.remove to_read addr
            in
            let%bind write = sample we in
+	 let%bind () = sync in
            if write then
              let to_write =
                Map.change to_write addr ~f:(function
@@ -50,7 +49,6 @@ let model =
              in
              let state = Map.set state ~key:addr ~data in
              let%bind () = sync in
-             let%bind () = output data in
              let%bind () = Logic.require we ~f:not in
              let%bind () = sync in
              let%bind () = output data in
