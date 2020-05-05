@@ -4,6 +4,7 @@ let all =
   [
     ("0", List.init ~f:(const 0));
     ("255", List.init ~f:(const 0xff));
+    ("count", List.init ~f:(fun i -> i land 0xff));
     ( "seven-segment",
       fun _ ->
         let a = 0x01 in
@@ -33,7 +34,8 @@ let all =
           | 0xF -> a lor f lor g lor e
           | _ -> assert false
         in
-        let letter_h_dot = f lor g lor e lor c lor dp in
+        (* let letter_H_dot = f lor b lor g lor e lor c lor dp in *)
+        let letter_h_dot = f lor g lor e lor c lor dp in 
         List.init
           (2 * 4 * 256)
           ~f:(fun addr ->

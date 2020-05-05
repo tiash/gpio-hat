@@ -51,7 +51,7 @@ end = struct
     let () = assert (popcount max_value = bits)
 
     let of_int n =
-      if n <> n land max_value then
+      if n <> (n land max_value) then
         raise_s
           [%message
             "Value is out of range, unexpected pins"
@@ -71,13 +71,13 @@ end = struct
 
   let get () =
     List.foldi pins ~init:0 ~f:(fun ix acc pin ->
-        if Gpio_hat.get pin then acc lor (1 lsl ix) else 0)
+        if Gpio_hat.get pin then acc lor (1 lsl ix) else acc)
     |> of_int
 
   let set n =
     let n = to_int n in
     List.iteri pins ~f:(fun ix pin ->
-        Gpio_hat.set pin (Int.equal (n land (1 lsl ix)) 0))
+        Gpio_hat.set pin (Int.(<>) (n land (1 lsl ix)) 0))
 end
 
 module Make (T : sig
@@ -148,19 +148,32 @@ end = struct
     List.iter (T.config_pins ~cs ~we ~oe) ~f:(fun (pin, value) ->
         Gpio_hat.set pin value)
 
+  let ensure_init () = 
+    Addr.set (Addr.of_int 0);
+    config_pins ~cs:false ~we:false ~oe:false;
+    Gpio_hat.flush ();
+    Caml.Unix.sleepf (Time.Span.to_sec T.write_timeout)
+;;
+    
+
   let read_word addr =
-    config_pins ~cs:true ~we:false ~oe:true;
+    (* ensure_init (); *)
+    config_pins ~cs:true ~we:false ~oe:false;
     Addr.set addr;
     Data.will_get ();
+    Gpio_hat.flush ();
+    config_pins ~cs:true ~we:false ~oe:true;
     Gpio_hat.flush ();
     Caml.Unix.sleepf (Time.Span.to_sec T.read_latency);
     Gpio_hat.flush ();
     let data = Data.get () in
-    config_pins ~cs:false ~we:false ~oe:false;
+    Gpio_hat.flush ();
+    config_pins ~cs:true ~we:false ~oe:false;
     Gpio_hat.flush ();
     data
 
   let write_word addr data =
+    (* ensure_init (); *)
     let old_data = read_word addr in
     if Data.equal data old_data then ()
     else (
@@ -171,12 +184,12 @@ end = struct
       config_pins ~cs:true ~we:true ~oe:false;
       Gpio_hat.flush ();
       Caml.Unix.sleepf (Time.Span.to_sec T.write_pulse);
-      Gpio_hat.flush ();
-      config_pins ~cs:false ~we:false ~oe:false;
+      config_pins ~cs:true ~we:false ~oe:false;
       Gpio_hat.flush ();
       let write_start = Time.now () in
       let rec wait_loop () =
-        Caml.Unix.sleepf (Time.Span.to_sec T.read_latency);
+        let now = Time.now () in
+        (* Caml.Unix.sleepf (Time.Span.to_sec T.read_latency); *)
         let new_data = read_word addr in
         if
           T.write_finished ~expected:(Data.to_int data)
@@ -192,7 +205,7 @@ end = struct
                   (new_data : Data.t)];
           () )
         else if
-          Time.Span.( > ) (Time.diff (Time.now ()) write_start) T.write_timeout
+          Time.Span.( > ) (Time.diff now write_start) T.write_timeout
         then
           raise_s
             [%message
@@ -207,14 +220,16 @@ end = struct
       wait_loop () )
 
   let read ?(pos = Addr.of_int 0) ?length () =
+    ensure_init (); 
     let length = Option.value length ~default:(capacity - Addr.to_int pos) in
-    assert (Addr.to_int pos + length < capacity);
+    assert (Addr.to_int pos + length <= capacity);
     List.init length ~f:(fun ix ->
         read_word (Addr.of_int (Addr.to_int pos + ix)))
 
   let write ?(pos = Addr.of_int 0) data =
+    ensure_init (); 
     let length = List.length data in
-    assert (Addr.to_int pos + length < capacity);
+    assert (Addr.to_int pos + length <= capacity);
     List.iteri data ~f:(fun ix data ->
         let addr = Addr.of_int (Addr.to_int pos + ix) in
         write_word addr data);
@@ -320,11 +335,12 @@ end = struct
            ]
        in
        fun () ->
+    ensure_init (); 
          Range.iter range ~f:(fun addr ->
              let data = read_word addr in
              match format with
-             | `Binary -> printf "%c" (Char.of_int_exn (Data.to_int data))
-             | `Words -> printf !"%{Data}\n" data))
+             | `Binary -> printf "%c%!" (Char.of_int_exn (Data.to_int data))
+             | `Words -> printf !"%{Data}%!\n" data))
 
   let data_param =
     let%map_open.Command source = Data_source.param in
@@ -340,6 +356,7 @@ end = struct
        and expected_data = data_param in
        let expected_data = expected_data range in
        fun () ->
+    ensure_init (); 
          let errors = ref false in
          List.iteri expected_data ~f:(fun ix expected_data ->
              let addr = Range.addr range ix in
@@ -360,7 +377,9 @@ end = struct
     Command.basic ~summary:"Check data"
       (let%map_open.Command range = Range.param and data = data_param in
        let data = data range in
-       fun () -> write ~pos:(Range.pos range) data)
+       fun () ->
+    ensure_init (); 
+write ~pos:(Range.pos range) data)
 
   let command =
     Command.group

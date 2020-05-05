@@ -20,25 +20,28 @@ let model =
      and carry = output "~CARRY" 15 >>| Util.not' in
      let%bind () = Logic.all_unit [ load false; clock false ] in
      let%bind () = sync in
-     let check n =
-       let%map () = q n and () = carry (n = 0xf) in
+     let check ~ent ~dir n =
+       let%map () = q n and () = carry (ent && (if dir then n=0xf else n = 0x0)) in
        n
      in
      let load =
-       let%bind n = n and () = load true in
+       let%bind () = sync in
+       let%bind n = n and ent = ent and (_:bool) = enp and dir = dir and () = load true in
        let%bind () = sync in
        let%bind () = clock true in
        let%bind () = sync in
        let%bind () = clock false and () = load false in
-       check n
+       check ~ent ~dir n
      in
      let step ~n =
-       let%bind enp = enp and ent = ent and dir = dir in
+       let%bind () = sync in
+       let%bind enp = sample enp and ent = sample ent and dir = sample dir in
        let%bind () = sync in
        let%bind () = clock true in
        let%bind () = sync in
        let%bind () = clock false in
-       check (if enp && ent then if dir then n + 1 else n - 1 else n)
+       let%bind () = sync in
+       check ~ent ~dir ((if enp && ent then if dir then n + 1 else n - 1 else n) land 0xf)
      in
      let rec count ~n ~steps =
        if steps <= 0 then return ()
@@ -47,4 +50,4 @@ let model =
          count ~n ~steps:(steps - 1)
      in
      let%bind n = load in
-     count ~n ~steps:5 |> Logic.ignore_m)
+     count ~n ~steps:10 |> Logic.ignore_m)
