@@ -31,17 +31,23 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
    I got mine fabricated and part assembled by JLCPCB and then soldered on the headers and ZIF socket.
    (Soldering the TCA6424A is way beyond my non-existing soldering skill).
 2. Mount to a raspberry PI (Hopefully you added some mounting screws before soldering the ZIF socket)
-3. Install OPAM and follow the instructions to setup a simple ocaml environment
+3. Ensure that the I2C bus is enabled
+   ```bash
+   sudo raspi-config nonint do_i2c 0  # yes the flag is inverted!
+   # Or use the menu to enable I2C. 
+   ```
+   
+4. Install OPAM and follow the instructions to setup a simple ocaml environment
    ```bash
    sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
    opam init
    opam install dune core ppx_jane time_now
    ```
-4. Get the code
+5. Get the code
    ```bash
    git clone https://github.com/tiash/gpio-hat
    ``` 
-5. Build the tools
+6. Build the tools
    ```bash
    dune build --auto-promote
    ```
@@ -65,19 +71,43 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
 4. If the IC has defects (or you selected the wrong IC_NAME) the tool will report errors
    and print the combination of inputs that triggered the unexpected output.
 
+   You can also add support for more ICs by creating a simulation of the logic
+   in [src/ic-tester/models/]. See the existing models in that directory for examples.
+
 ## Programming an 16C28 EEPROM
-If you're using a different EEPROM you can easily add support to it to the tool.
-**TODO** Point to where to code needs to be edited
+If you're using a different EEPROM you can easily add support to it to the tool.  See [src/eeprom-flasher/eeprom_flasher.ml].
 1. Prepare a binary file with the desired rom content
 2. Insert the EEPROM rom in the correct position (furthest from the IO ports with PIN1 furthest away).2. P
 3. Run
    ```bash
-   bin/flasher.exe 16c28 write FILE
+   bin/flasher.exe 28c16 write -file FILE
+   bin/flasher.exe 28c16 check -file FILE
    ```
    This will read the IC, write the changes, and finally read back the ROM to verify the write succeeded.
    Depending on where you sourced your EEPROMs you may find some faulty chips.
+
+   There are also a couple of generators (e.g. `bin/flasher.exe 28c16 {write,check} -seven-segment` will write a 3 seven segment decoder logic)
+
    
 # Things to maybe do someday
+
+## Auto generate truth tables for the ICs
+The information is all there, and it would help with making sure the spec
+didn't have errors.
+This would also allow generating mini datasheets.
+
+## Improve the IC testing monad
+Currently the testing works by generating all the possilbe walk in a semi random way
+and then running them.
+The randomization is poor (depth first!), change the algorithm to keep track of the choices made
+and then do random walks from the start until everything has been reached.
+
+This also eliminates the need for the 'sample' optimization, we can just stop after some number of walks
+and assume we have tested sufficiently.
+
+## Even more improvements
+Its not clear that keeping the state in the Logic monad is the right thing.
+It's very awkward modelling statefull ICs and the random walk isn't really a good simulation.
 
 ## Implement auto detection of ICs
 The testing programs have enough information to allow auto-detecting the IC thats inserted.
