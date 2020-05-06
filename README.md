@@ -14,18 +14,6 @@ Several people made some really neat [arduino](https://blog.arduino.cc/2018/02/0
 
 So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was born.
 
-The Raspberry PI has actually surprisingly few IO pins and they are all on 3.3V, I was looking for something that was a little more robust and could handle 5V TTL levels. With a bit of searching I discovered the [TCA6424A](https://www.ti.com/product/TCA6424A), 24pin Level shifting I2C GPIO expander, a perfect fit (mostly).
-The part is a little small though, but nothing that a cheap SMD assembly shop couldn't handle.
-
-The board features a space for a ZIF socket for inserting the IC to be tested, a Jumper to select the drive voltage (3.3V or 5V), and some pin headers for the Voltage and Ground (To hook up an external voltage supply or to use if an IC requires more power than the TCA6424 can supply).
-I also included the EEPROM for the HAT-id, and a header for hooking up a small touch screen though I ended up not using either.
-![The PCB](Hardware/board.png)
-
-You can find the design files and everything I sent to the PCB and assembly shop under [Hardware/].
-
-NB: This was my first ever PCB design (and also my first forray into hardware electronics), so I probably did all the wrong things (feedback welcome!).
-
-
 # Setup
 1. Fabricate the HAT and attach it to a Raspberry PI
    I got mine fabricated and part assembled by JLCPCB and then soldered on the headers and ZIF socket.
