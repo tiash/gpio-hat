@@ -5,7 +5,7 @@ I recently ordered many 74LSxx series ICs from China and wanted a way to test
 the chips to make sure they worked as expected before I put them in my circuits.
 
 This was the result:
-**TODO** Add image**
+![GPIO-Hat](Hardware/oblique.png)
 
 And some ocaml programs for driving the whole thing.
 
@@ -19,7 +19,7 @@ The part is a little small though, but nothing that a cheap SMD assembly shop co
 
 The board features a space for a ZIF socket for inserting the IC to be tested, a Jumper to select the drive voltage (3.3V or 5V), and some pin headers for the Voltage and Ground (To hook up an external voltage supply or to use if an IC requires more power than the TCA6424 can supply).
 I also included the EEPROM for the HAT-id, and a header for hooking up a small touch screen though I ended up not using either.
-**TODO** Image of the PCB with the different features highlighted
+![The PCB](Hardware/board.png)
 
 You can find the design files and everything I sent to the PCB and assembly shop under [Hardware/].
 
@@ -36,7 +36,6 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
    sudo raspi-config nonint do_i2c 0  # yes the flag is inverted!
    # Or use the menu to enable I2C. 
    ```
-   
 4. Install OPAM and follow the instructions to setup a simple ocaml environment
    ```bash
    sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
@@ -58,7 +57,7 @@ NB: This was my first ever PCB design (and also my first forray into hardware el
 1. Make sure you have the voltage jumper set correctly for your ICs (don't want to burn out the IC, or the raspberry pi!)
 2. Insert the IC into the socket & pull the leaver to lock the socket in place an make contact.
    Make sure that the IC is in the position furthest from the IO ports, with the Pin 1 mark pointing away
-      **TODO** Image of the board with an IC inserted correctly, highlight the pin1 mark
+   ![Board with chip](Hardware/with_74245.png)
 3. Run the IC tester tool
    ```bash
    bin/tester.exe test IC_NAME
