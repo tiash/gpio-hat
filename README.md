@@ -7,7 +7,7 @@ the chips to make sure they worked as expected before I put them in my circuits.
 This was the result:
 ![GPIO-Hat](Hardware/oblique.png)
 
-And some ocaml programs for driving the whole thing.
+And some OCaml programs for driving the whole thing.
 
 # Hardware
 Several people made some really neat [arduino](https://blog.arduino.cc/2018/02/05/automated-ic-testing-with-arduino-mega/) [powered](https://hackaday.com/2018/02/15/building-an-arduino-smart-ic-tester-for-25/) [IC](https://www.electronicsforu.com/electronics-projects/hardware-diy/arduino-based-digital-ic-tester-truth-table) [testers](https://blog.arduino.cc/2018/02/05/automated-ic-testing-with-arduino-mega/), but these all seem to be running into the limits of what the platform could do, so I thought why no use a PI, it has WAY more compute power!
@@ -24,7 +24,7 @@ So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was bor
    sudo raspi-config nonint do_i2c 0  # yes the flag is inverted!
    # Or use the menu to enable I2C. 
    ```
-4. Install OPAM and follow the instructions to setup a simple ocaml environment
+4. Install OPAM and follow the instructions to setup a simple OCaml environment
    ```bash
    sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
    opam init
@@ -63,8 +63,8 @@ So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was bor
 
 ## Programming an 16C28 EEPROM
 If you're using a different EEPROM you can easily add support to it to the tool.  See [src/eeprom-flasher/eeprom_flasher.ml].
-1. Prepare a binary file with the desired rom content
-2. Insert the EEPROM rom in the correct position (furthest from the IO ports with PIN1 furthest away).2. P
+1. Prepare a binary file with the desired EEPROM content
+2. Insert the EEPROM in the correct position (furthest from the IO ports with PIN1 furthest away).2. P
 3. Run
    ```bash
    bin/flasher.exe 28c16 write -file FILE
@@ -81,10 +81,10 @@ If you're using a different EEPROM you can easily add support to it to the tool.
 ## Auto generate truth tables for the ICs
 The information is all there, and it would help with making sure the spec
 didn't have errors.
-This would also allow generating mini datasheets.
+This would also allow generating mini data sheets.
 
 ## Improve the IC testing monad
-Currently the testing works by generating all the possilbe walk in a semi random way
+Currently the testing works by generating all the possible walk in a semi random way
 and then running them.
 The randomization is poor (depth first!), change the algorithm to keep track of the choices made
 and then do random walks from the start until everything has been reached.
@@ -94,10 +94,10 @@ and assume we have tested sufficiently.
 
 ## Even more improvements
 Its not clear that keeping the state in the Logic monad is the right thing.
-It's very awkward modelling statefull ICs and the random walk isn't really a good simulation.
+It's very awkward modeling state-full ICs and the random walk isn't really a good simulation.
 
 ## Implement auto detection of ICs
-The testing programs have enough information to allow auto-detecting the IC thats inserted.
+The testing programs have enough information to allow auto-detecting the IC that's inserted.
 
 ## Finish the hardware inputs
 I designed the HAT with a headers for a [small touch screen](https://www.banggood.com/1_8-Inch-LCD-Screen-SPI-Serial-Port-Module-TFT-Color-Display-Touch-Screen-ST7735-p-1414465.html), but never actually hooked it up...
@@ -105,7 +105,7 @@ I designed the HAT with a headers for a [small touch screen](https://www.banggoo
 It should be possible to have the screen show a simple UI for selecting the IC, running the tests and showing the results.
  
 ## Cleanup and improve the design of the HAT Board
-The board layout should be changed to put the ICs on the under side, or not underneat the ZIF socket.
+The board layout should be changed to put the ICs on the under side, or not underneath the ZIF socket.
 There's also lots of features that could make this better.
 Here's a few items that come to mind:
 - Integrated supply voltage controller instead of the 3.3V/5.0V jumper,
