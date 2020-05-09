@@ -33,6 +33,8 @@ So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was bor
 5. Get the code
    ```bash
    git clone https://github.com/tiash/gpio-hat
+   cd gpio-hat
+   git submodule update --init --recursive
    ``` 
 6. Build the tools
    ```bash
