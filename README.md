@@ -28,7 +28,7 @@ So the idea of a PI Hat with a ZIF socket ~~and screen~~ for testing ICs was bor
    ```bash
    sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
    opam init
-   opam install dune core ppx_jane time_now
+   opam install dune core async ppx_jane time_now
    ```
 5. Get the code
    ```bash
